@@ -194,9 +194,11 @@ Laravel GeoGenius makes it trivial to initialise a **country-aware phone input f
 </head>
 <body>
 
-    {!! laravelGeoGenius()->initIntlPhoneInput() !!}
-
+    // must be use type="tel" in your phone input
     <input id="phone" type="tel" name="phone">
+    
+    // Before Body close tag
+    {!! laravelGeoGenius()->initIntlPhoneInput() !!}
 </body>
 </html>
 ```
