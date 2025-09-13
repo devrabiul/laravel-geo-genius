@@ -1,0 +1,43 @@
+{
+    "name": "devrabiul/laravel-geo-genius",
+    "description": "Laravel GeoGenius — A powerful, intelligent toolkit for geo-location, timezone, and locale-based features in Laravel applications.",
+    "type": "library",
+    "keywords": [
+        "laravel", "timezone", "timezone detection", "timezone conversion",
+        "user timezone", "laravel timezone", "datetime", "internationalization",
+        "geo", "geolocation", "locale", "ip location", "geo genius",
+        "region detection", "country detection", "context-aware"
+    ],
+    "homepage": "https://github.com/devrabiul/laravel-geo-genius",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Muhammad Rabiul",
+            "email": "devrabiul@gmail.com"
+        }
+    ],
+    "autoload": {
+        "psr-4": {
+            "Devrabiul\\LaravelGeoGenius\\": "src/"
+        },
+        "files": [
+            "src/utils/GeniusTranslate.php",
+            "src/utils/GeniusHelpers.php"
+        ]
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "Devrabiul\\LaravelGeoGenius\\LaravelGeoGeniusServiceProvider"
+            ],
+            "aliases": {
+                "LaravelGeoGenius": "Devrabiul\\LaravelGeoGenius\\Facades\\LaravelGeoGenius"
+            }
+        }
+    },
+    "require": {
+        "php": "^8.0"
+    },
+    "minimum-stability": "dev",
+    "prefer-stable": true
+}
