@@ -2,6 +2,7 @@
 
 namespace Devrabiul\LaravelGeoGenius;
 
+use Devrabiul\LaravelGeoGenius\Commands\AddNewLanguage;
 use Devrabiul\LaravelGeoGenius\Commands\AddTimezoneColumn;
 use Devrabiul\LaravelGeoGenius\Services\GeoLocationService;
 use Devrabiul\LaravelGeoGenius\Services\LanguageService;
@@ -14,9 +15,6 @@ use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Facades\Response;
 use Devrabiul\LaravelGeoGenius\Services\GeoService;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
-
-use Illuminate\Routing\Router as RouterClass;
-use Devrabiul\LaravelGeoGenius\Middlewares\CorsFixer;
 
 /**
  * Class LaravelGeoGeniusServiceProvider
@@ -58,10 +56,6 @@ class LaravelGeoGeniusServiceProvider extends ServiceProvider
         if ($this->app->runningInConsole()) {
             $this->registerPublishing();
         }
-
-        // Register CORS Middleware Alias
-        $router = $this->app->make(RouterClass::class);
-        $router->aliasMiddleware('laravel-geo-genius.cors-fixer', CorsFixer::class);
     }
 
     /**
@@ -110,6 +104,7 @@ class LaravelGeoGeniusServiceProvider extends ServiceProvider
 
         $this->commands([
             AddTimezoneColumn::class,
+            AddNewLanguage::class,
         ]);
 
         $this->app->singleton(GeoLocationService::class);

@@ -153,7 +153,7 @@ class GeoLocationService
     public function getCountry(): ?string
     {
         $geoData = $this->locateVisitor();
-        return $geoData['countryName'] ?? null;
+        return $geoData['country'] ?? null;
     }
 
     public function getCountryCode(): ?string

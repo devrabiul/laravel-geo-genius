@@ -6,10 +6,41 @@ use Devrabiul\LaravelGeoGenius\Services\TranslateService\TranslateService;
 use Devrabiul\LaravelGeoGenius\Trait\LanguageTrait;
 use Illuminate\Support\Facades\Request;
 use Illuminate\Support\Str;
+use Illuminate\Support\Facades\App;
+use Illuminate\Support\Facades\Session;
 
 class LanguageService
 {
     use LanguageTrait;
+
+    public function getUserLanguage(): mixed
+    {
+        if (Session::has('local_Language')) {
+            $languageCode = Session::get('local_Language');
+        } else {
+            $userCountryCode = strtolower(laravelGeoGenius()->geo()->getCountryCode());
+            $languageCode = LanguageTrait::getLanguageCodeFromCountryCode($userCountryCode);
+
+            $direction = self::isRtl($languageCode) ? 'rtl' : 'ltr';
+            Session::put('local_Language', $languageCode);
+            Session::put('direction', $direction);
+        }
+        return $languageCode;
+    }
+
+    public function changeUserLanguage($locale): void
+    {
+        $languageCode = LanguageTrait::checkLocaleValidity(locale: $locale);
+        $direction = self::isRtl($languageCode) ? 'rtl' : 'ltr';
+        Session::put('local_Language', $languageCode);
+        Session::put('direction', $direction);
+        App::setLocale($languageCode);
+    }
+
+    public function getUserLangDirection(): string
+    {
+        return Session::get('direction') ?? 'ltr';
+    }
 
     /**
      * Detect user preferred language from Accept-Language header.

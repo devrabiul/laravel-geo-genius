@@ -15,6 +15,7 @@ It automatically retrieves detailed IP-based location data, detects the user’s
 [![Total Downloads](https://poser.pugx.org/devrabiul/laravel-geo-genius/downloads)](https://packagist.org/packages/devrabiul/laravel-geo-genius)
 [![Monthly Downloads](https://poser.pugx.org/devrabiul/laravel-geo-genius/d/monthly)](https://packagist.org/packages/devrabiul/laravel-geo-genius)
 ![GitHub license](https://img.shields.io/github/license/devrabiul/laravel-geo-genius)
+[![Buy us a tree](https://img.shields.io/badge/Treeware-%F0%9F%8C%B3-lightgreen)](https://plant.treeware.earth/devrabiul/laravel-geo-genius)
 ![GitHub Repo stars](https://img.shields.io/github/stars/devrabiul/laravel-geo-genius?style=social)
 
 ---
@@ -106,6 +107,40 @@ Configure in `config/laravel-geo-genius.php`:
 ],
 ```
 
+## 🌐 Change Current User Language
+
+You can programmatically change the current user's language using the `changeUserLanguage` method:
+
+```php
+use Illuminate\Support\Facades\Route;
+
+Route::get('/change-lang', function () {
+    // Change current user language to Bengali
+    laravelGeoGenius()->language()->changeUserLanguage('bn');
+
+    // Continue your logic
+    return redirect()->back();
+});
+````
+
+> Supported locale codes depend on your configuration (`config/laravel-geo-genius.php`) and the languages you have added via `geo:add-language`.
+
+
+## 🛠 Timezone Artisan Commands
+
+Laravel GeoGenius ships with helpful artisan commands:
+
+| Command                                | Description                                           |
+|----------------------------------------|-------------------------------------------------------|
+| `php artisan geo:add-language {locale}` | Add a new language (e.g. `en`, `bn`) to your app.     |
+
+### Examples
+
+```bash
+# Add Bengali language
+php artisan geo:add-language bn
+````
+
 ---
 
 ## 🕒 Timezone Detection & Conversion
@@ -121,6 +156,21 @@ $timezone = $tz->getUserTimezone();
 // Convert UTC datetime to user timezone
 echo $tz->convertToUserTimezone('2025-09-13 15:00:00');
 ```
+
+## 🛠 Timezone Artisan Commands
+
+Laravel GeoGenius ships with helpful artisan commands:
+
+| Command                                | Description                                           |
+|----------------------------------------|-------------------------------------------------------|
+| `php artisan geo:add-timezone-column {table}` | Add a nullable `timezone` column to the specified table if it does not exist. |
+
+### Examples
+
+```bash
+# Add a timezone column to the 'users' table
+php artisan geo:add-timezone-column users
+````
 
 ---
 

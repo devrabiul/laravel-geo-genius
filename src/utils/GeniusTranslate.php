@@ -13,6 +13,13 @@ if (!function_exists('geniusTrans')) {
 if (!function_exists('geniusTranslate')) {
     function geniusTranslate($key = null): string|null
     {
+        if (
+            !File::exists(base_path('resources/lang/en/messages.php')) ||
+            !File::exists(base_path('resources/lang/en/new-messages.php'))
+        ) {
+            LanguageTrait::getLanguageAddProcess(lang: 'en');
+        }
+
         if (!empty($key) || $key == 0) {
             if (App::getLocale() != 'en') {
                 $languageDirectories = LanguageTrait::getLanguageFilesDirectories(path: base_path('resources/lang/'));
@@ -20,7 +27,8 @@ if (!function_exists('geniusTranslate')) {
                     LanguageTrait::geniusTranslateMessageValueByKey(local: $directory, key: $key);
                 }
             }
-            $local = LanguageTrait::checkLocaleValidity(locale: App::getLocale());
+            $local = LanguageTrait::checkLocaleValidity(locale: laravelGeoGenius()->language()->getUserLanguage());
+            App::setLocale($local);
             return LanguageTrait::geniusTranslateMessageValueByKey(local: $local, key: $key);
         }
         return $key;

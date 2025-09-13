@@ -7,10 +7,10 @@ use Devrabiul\LaravelGeoGenius\Services\LanguageService;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\App;
+use Illuminate\Support\Facades\Session;
 
 trait LanguageTrait
 {
-
     public static function getLanguageFilesDirectories(string $path): array
     {
         if (!is_dir(resource_path('lang'))) {
@@ -38,6 +38,10 @@ trait LanguageTrait
 
     public static function checkLocaleValidity($locale): string
     {
+        $langDirectories = LanguageTrait::getLanguageFilesDirectories(path: base_path('resources/lang/'));
+        if ($locale != 'en' && !in_array($locale, $langDirectories)) {
+            return 'en';
+        }
         return array_key_exists($locale, self::getAllLanguageNames()) ? $locale : 'en';
     }
 
@@ -66,13 +70,6 @@ trait LanguageTrait
 
     public static function geniusTranslateMessageValueByKey(string $local, string|null $key): mixed
     {
-        if (
-            !File::exists(base_path('resources/lang/en/messages.php')) ||
-            !File::exists(base_path('resources/lang/en/new-messages.php'))
-        ) {
-            self::getLanguageAddProcess(lang: 'en');
-        }
-
         if (
             !File::exists(base_path('resources/lang/' . $local . '/messages.php')) ||
             !File::exists(base_path('resources/lang/' . $local . '/new-messages.php'))
@@ -175,190 +172,737 @@ trait LanguageTrait
         exec('chmod -R 0777 ' . resource_path('lang'), $languagePath);
     }
 
+    public static function getLanguageCodeFromCountryCode(string $countryCode): ?string
+    {
+        $languageData = self::getAllLanguageNames();
+        foreach ($languageData as $languageCode => $data) {
+            if (in_array(strtoupper($countryCode), $data['country_codes'])) {
+                return $languageCode;
+            }
+        }
+        return 'en';
+    }
+
 
     public static function getAllLanguageNames(): array
     {
         return [
-            'aa' => 'Afar',
-            'ab' => 'Abkhazian',
-            'af' => 'Afrikaans',
-            'ak' => 'Akan',
-            'sq' => 'Albanian',
-            'am' => 'Amharic',
-            'ar' => 'Arabic',
-            'an' => 'Aragonese',
-            'hy' => 'Armenian',
-            'as' => 'Assamese',
-            'av' => 'Avaric',
-            'ae' => 'Avestan',
-            'ay' => 'Aymara',
-            'az' => 'Azerbaijani',
-            'ba' => 'Bashkir',
-            'bm' => 'Bambara',
-            'eu' => 'Basque',
-            'be' => 'Belarusian',
-            'bn' => 'Bengali',
-            'bh' => 'Bihari languages',
-            'bi' => 'Bislama',
-            'bs' => 'Bosnian',
-            'br' => 'Breton',
-            'bg' => 'Bulgarian',
-            'my' => 'Burmese',
-            'ca' => 'Catalan',
-            'ch' => 'Chamorro',
-            'ce' => 'Chechen',
-            'zh' => 'Chinese',
-            'cu' => 'Church Slavic',
-            'cv' => 'Chuvash',
-            'kw' => 'Cornish',
-            'co' => 'Corsican',
-            'cr' => 'Cree',
-            'cs' => 'Czech',
-            'da' => 'Danish',
-            'dv' => 'Divehi',
-            'nl' => 'Dutch',
-            'dz' => 'Dzongkha',
-            'en' => 'English',
-            'eo' => 'Esperanto',
-            'et' => 'Estonian',
-            'ee' => 'Ewe',
-            'fo' => 'Faroese',
-            'fa' => 'Persian',
-            'fj' => 'Fijian',
-            'fi' => 'Finnish',
-            'fr' => 'French',
-            'fy' => 'Western Frisian',
-            'ff' => 'Fulah',
-            'gd' => 'Scottish Gaelic',
-            'gl' => 'Galician',
-            'lg' => 'Ganda',
-            'ka' => 'Georgian',
-            'de' => 'German',
-            'ki' => 'Kikuyu',
-            'el' => 'Greek',
-            'kl' => 'Kalaallisut',
-            'gn' => 'Guarani',
-            'gu' => 'Gujarati',
-            'ht' => 'Haitian',
-            'ha' => 'Hausa',
-            'he' => 'Hebrew',
-            'hz' => 'Herero',
-            'hi' => 'Hindi',
-            'ho' => 'Hiri Motu',
-            'hr' => 'Croatian',
-            'hu' => 'Hungarian',
-            'ig' => 'Igbo',
-            'is' => 'Icelandic',
-            'io' => 'Ido',
-            'ii' => 'Sichuan Yi',
-            'iu' => 'Inuktitut',
-            'ie' => 'Interlingue',
-            'ia' => 'Interlingua',
-            'id' => 'Indonesian',
-            'ik' => 'Inupiaq',
-            'it' => 'Italian',
-            'jv' => 'Javanese',
-            'ja' => 'Japanese',
-            'kn' => 'Kannada',
-            'ks' => 'Kashmiri',
-            'kr' => 'Kanuri',
-            'kk' => 'Kazakh',
-            'km' => 'Central Khmer',
-            'ki' => 'Kikuyu',
-            'rw' => 'Kinyarwanda',
-            'ky' => 'Kirghiz',
-            'kv' => 'Komi',
-            'kg' => 'Kongo',
-            'ko' => 'Korean',
-            'kj' => 'Kuanyama',
-            'ku' => 'Kurdish',
-            'lo' => 'Lao',
-            'la' => 'Latin',
-            'lv' => 'Latvian',
-            'li' => 'Limburgan',
-            'ln' => 'Lingala',
-            'lt' => 'Lithuanian',
-            'lu' => 'Luba-Katanga',
-            'lb' => 'Luxembourgish',
-            'mk' => 'Macedonian',
-            'mh' => 'Marshallese',
-            'ml' => 'Malayalam',
-            'mr' => 'Marathi',
-            'mg' => 'Malagasy',
-            'mt' => 'Maltese',
-            'mn' => 'Mongolian',
-            'na' => 'Nauru',
-            'nv' => 'Navajo',
-            'nr' => 'Ndebele, South',
-            'nd' => 'Ndebele, North',
-            'ng' => 'Ndonga',
-            'ne' => 'Nepali',
-            'nn' => 'Norwegian Nynorsk',
-            'nb' => 'Norwegian Bokmål',
-            'no' => 'Norwegian',
-            'ny' => 'Chichewa',
-            'oc' => 'Occitan',
-            'oj' => 'Ojibwa',
-            'or' => 'Oromo',
-            'om' => 'Oromo',
-            'os' => 'Ossetian',
-            'pa' => 'Panjabi',
-            'pi' => 'Pali',
-            'pl' => 'Polish',
-            'pt' => 'Portuguese',
-            'ps' => 'Pashto',
-            'qu' => 'Quechua',
-            'rm' => 'Romansh',
-            'ro' => 'Romanian',
-            'rn' => 'Rundi',
-            'ru' => 'Russian',
-            'sg' => 'Sango',
-            'sa' => 'Sanskrit',
-            'si' => 'Sinhala',
-            'sk' => 'Slovak',
-            'sl' => 'Slovenian',
-            'se' => 'Northern Sami',
-            'sm' => 'Samoan',
-            'sn' => 'Shona',
-            'sd' => 'Sindhi',
-            'so' => 'Somali',
-            'st' => 'Sotho, Southern',
-            'es' => 'Spanish',
-            'sc' => 'Sardinian',
-            'sr' => 'Serbian',
-            'ss' => 'Swati',
-            'su' => 'Sundanese',
-            'sw' => 'Swahili',
-            'sv' => 'Swedish',
-            'ty' => 'Tahitian',
-            'ta' => 'Tamil',
-            'tt' => 'Tatar',
-            'te' => 'Telugu',
-            'tg' => 'Tajik',
-            'tl' => 'Tagalog',
-            'th' => 'Thai',
-            'bo' => 'Tibetan',
-            'ti' => 'Tigrinya',
-            'to' => 'Tonga',
-            'tn' => 'Tswana',
-            'ts' => 'Tsonga',
-            'tk' => 'Turkmen',
-            'tr' => 'Turkish',
-            'tw' => 'Twi',
-            'ug' => 'Uighur',
-            'uk' => 'Ukrainian',
-            'ur' => 'Urdu',
-            'uz' => 'Uzbek',
-            've' => 'Venda',
-            'vi' => 'Vietnamese',
-            'vo' => 'Volapük',
-            'wa' => 'Walloon',
-            'wo' => 'Wolof',
-            'xh' => 'Xhosa',
-            'yi' => 'Yiddish',
-            'yo' => 'Yoruba',
-            'za' => 'Zhuang',
-            'zu' => 'Zulu',
+            'aa' => [
+                'name' => 'Afar',
+                'country_codes' => ['DJ', 'ER', 'ET'],
+            ],
+            'ab' => [
+                'name' => 'Abkhazian',
+                'country_codes' => ['GE'],
+            ],
+            'af' => [
+                'name' => 'Afrikaans',
+                'country_codes' => ['NA', 'ZA'],
+            ],
+            'ak' => [
+                'name' => 'Akan',
+                'country_codes' => ['GH'],
+            ],
+            'sq' => [
+                'name' => 'Albanian',
+                'country_codes' => ['AL', 'XK'],
+            ],
+            'am' => [
+                'name' => 'Amharic',
+                'country_codes' => ['ET'],
+            ],
+            'ar' => [
+                'name' => 'Arabic',
+                'country_codes' => ['DZ', 'BH', 'TD', 'KM', 'DJ', 'EG', 'ER', 'IQ', 'IL', 'JO', 'KW', 'LB', 'LY', 'MR', 'MA', 'OM', 'PS', 'QA', 'SA', 'SO', 'SD', 'SY', 'TN', 'AE', 'EH', 'YE'],
+            ],
+            'an' => [
+                'name' => 'Aragonese',
+                'country_codes' => ['ES'],
+            ],
+            'hy' => [
+                'name' => 'Armenian',
+                'country_codes' => ['AM'],
+            ],
+            'as' => [
+                'name' => 'Assamese',
+                'country_codes' => ['IN'],
+            ],
+            'av' => [
+                'name' => 'Avaric',
+                'country_codes' => ['RU'],
+            ],
+            'ae' => [
+                'name' => 'Avestan',
+                'country_codes' => ['IR'],
+            ],
+            'ay' => [
+                'name' => 'Aymara',
+                'country_codes' => ['BO', 'PE'],
+            ],
+            'az' => [
+                'name' => 'Azerbaijani',
+                'country_codes' => ['AZ', 'IR'],
+            ],
+            'ba' => [
+                'name' => 'Bashkir',
+                'country_codes' => ['RU'],
+            ],
+            'bm' => [
+                'name' => 'Bambara',
+                'country_codes' => ['ML'],
+            ],
+            'eu' => [
+                'name' => 'Basque',
+                'country_codes' => ['ES', 'FR'],
+            ],
+            'be' => [
+                'name' => 'Belarusian',
+                'country_codes' => ['BY'],
+            ],
+            'bn' => [
+                'name' => 'Bengali',
+                'country_codes' => ['BD', 'IN'],
+            ],
+            'bh' => [
+                'name' => 'Bihari languages',
+                'country_codes' => ['IN'],
+            ],
+            'bi' => [
+                'name' => 'Bislama',
+                'country_codes' => ['VU'],
+            ],
+            'bs' => [
+                'name' => 'Bosnian',
+                'country_codes' => ['BA'],
+            ],
+            'br' => [
+                'name' => 'Breton',
+                'country_codes' => ['FR'],
+            ],
+            'bg' => [
+                'name' => 'Bulgarian',
+                'country_codes' => ['BG'],
+            ],
+            'my' => [
+                'name' => 'Burmese',
+                'country_codes' => ['MM'],
+            ],
+            'ca' => [
+                'name' => 'Catalan',
+                'country_codes' => ['AD', 'ES', 'FR', 'IT'],
+            ],
+            'ch' => [
+                'name' => 'Chamorro',
+                'country_codes' => ['GU', 'MP'],
+            ],
+            'ce' => [
+                'name' => 'Chechen',
+                'country_codes' => ['RU'],
+            ],
+            'zh' => [
+                'name' => 'Chinese',
+                'country_codes' => ['CN', 'HK', 'MO', 'SG', 'TW'],
+            ],
+            'cu' => [
+                'name' => 'Church Slavic',
+                'country_codes' => ['UA'],
+            ],
+            'cv' => [
+                'name' => 'Chuvash',
+                'country_codes' => ['RU'],
+            ],
+            'kw' => [
+                'name' => 'Cornish',
+                'country_codes' => ['GB'],
+            ],
+            'co' => [
+                'name' => 'Corsican',
+                'country_codes' => ['FR'],
+            ],
+            'cr' => [
+                'name' => 'Cree',
+                'country_codes' => ['CA'],
+            ],
+            'cs' => [
+                'name' => 'Czech',
+                'country_codes' => ['CZ', 'SK'],
+            ],
+            'da' => [
+                'name' => 'Danish',
+                'country_codes' => ['DK', 'FO', 'GL'],
+            ],
+            'dv' => [
+                'name' => 'Divehi',
+                'country_codes' => ['MV'],
+            ],
+            'nl' => [
+                'name' => 'Dutch',
+                'country_codes' => ['AW', 'BE', 'CW', 'NL', 'SX', 'SR'],
+            ],
+            'dz' => [
+                'name' => 'Dzongkha',
+                'country_codes' => ['BT'],
+            ],
+            'en' => [
+                'name' => 'English',
+                'country_codes' => ['AG', 'AU', 'BS', 'BB', 'BZ', 'BW', 'CA', 'CM', 'CK', 'DM', 'FJ', 'GM', 'GH', 'GI', 'GD', 'GU', 'GY', 'IE', 'IN', 'JM', 'KE', 'KI', 'LS', 'LR', 'MW', 'MT', 'MH', 'MU', 'FM', 'NA', 'NR', 'NZ', 'NG', 'NU', 'PK', 'PG', 'PH', 'RW', 'VC', 'WS', 'SC', 'SL', 'SG', 'SB', 'ZA', 'SS', 'SD', 'SZ', 'TZ', 'TO', 'TT', 'UG', 'GB', 'US', 'VU', 'ZM', 'ZW'],
+            ],
+            'eo' => [
+                'name' => 'Esperanto',
+                'country_codes' => ['worldwide'],
+            ],
+            'et' => [
+                'name' => 'Estonian',
+                'country_codes' => ['EE'],
+            ],
+            'ee' => [
+                'name' => 'Ewe',
+                'country_codes' => ['GH', 'TG'],
+            ],
+            'fo' => [
+                'name' => 'Faroese',
+                'country_codes' => ['FO', 'DK'],
+            ],
+            'fa' => [
+                'name' => 'Persian',
+                'country_codes' => ['IR', 'AF'],
+            ],
+            'fj' => [
+                'name' => 'Fijian',
+                'country_codes' => ['FJ'],
+            ],
+            'fi' => [
+                'name' => 'Finnish',
+                'country_codes' => ['FI'],
+            ],
+            'fr' => [
+                'name' => 'French',
+                'country_codes' => ['BE', 'BJ', 'BF', 'BI', 'CM', 'CA', 'CF', 'TD', 'CD', 'CG', 'CI', 'DJ', 'GQ', 'FR', 'GA', 'GN', 'HT', 'LU', 'MG', 'ML', 'MC', 'NE', 'RW', 'SN', 'SC', 'CH', 'TG', 'VU'],
+            ],
+            'fy' => [
+                'name' => 'Western Frisian',
+                'country_codes' => ['NL'],
+            ],
+            'ff' => [
+                'name' => 'Fulah',
+                'country_codes' => ['BJ', 'BF', 'CM', 'TD', 'GM', 'GN', 'GW', 'ML', 'MR', 'NE', 'NG', 'SN', 'SL'],
+            ],
+            'gd' => [
+                'name' => 'Scottish Gaelic',
+                'country_codes' => ['GB'],
+            ],
+            'gl' => [
+                'name' => 'Galician',
+                'country_codes' => ['ES'],
+            ],
+            'lg' => [
+                'name' => 'Ganda',
+                'country_codes' => ['UG'],
+            ],
+            'ka' => [
+                'name' => 'Georgian',
+                'country_codes' => ['GE'],
+            ],
+            'de' => [
+                'name' => 'German',
+                'country_codes' => ['AT', 'BE', 'DE', 'LI', 'LU', 'CH'],
+            ],
+            'ki' => [
+                'name' => 'Kikuyu',
+                'country_codes' => ['KE'],
+            ],
+            'el' => [
+                'name' => 'Greek',
+                'country_codes' => ['CY', 'GR'],
+            ],
+            'kl' => [
+                'name' => 'Kalaallisut',
+                'country_codes' => ['GL'],
+            ],
+            'gn' => [
+                'name' => 'Guarani',
+                'country_codes' => ['AR', 'BO', 'BR', 'PY'],
+            ],
+            'gu' => [
+                'name' => 'Gujarati',
+                'country_codes' => ['IN'],
+            ],
+            'ht' => [
+                'name' => 'Haitian',
+                'country_codes' => ['HT'],
+            ],
+            'ha' => [
+                'name' => 'Hausa',
+                'country_codes' => ['NE', 'NG'],
+            ],
+            'he' => [
+                'name' => 'Hebrew',
+                'country_codes' => ['IL'],
+            ],
+            'hz' => [
+                'name' => 'Herero',
+                'country_codes' => ['NA', 'BW'],
+            ],
+            'hi' => [
+                'name' => 'Hindi',
+                'country_codes' => ['IN'],
+            ],
+            'ho' => [
+                'name' => 'Hiri Motu',
+                'country_codes' => ['PG'],
+            ],
+            'hr' => [
+                'name' => 'Croatian',
+                'country_codes' => ['HR', 'BA'],
+            ],
+            'hu' => [
+                'name' => 'Hungarian',
+                'country_codes' => ['HU'],
+            ],
+            'ig' => [
+                'name' => 'Igbo',
+                'country_codes' => ['NG'],
+            ],
+            'is' => [
+                'name' => 'Icelandic',
+                'country_codes' => ['IS'],
+            ],
+            'io' => [
+                'name' => 'Ido',
+                'country_codes' => [],
+            ],
+            'ii' => [
+                'name' => 'Sichuan Yi',
+                'country_codes' => ['CN'],
+            ],
+            'iu' => [
+                'name' => 'Inuktitut',
+                'country_codes' => ['CA'],
+            ],
+            'ie' => [
+                'name' => 'Interlingue',
+                'country_codes' => [],
+            ],
+            'ia' => [
+                'name' => 'Interlingua',
+                'country_codes' => [],
+            ],
+            'id' => [
+                'name' => 'Indonesian',
+                'country_codes' => ['ID'],
+            ],
+            'ik' => [
+                'name' => 'Inupiaq',
+                'country_codes' => ['US'],
+            ],
+            'it' => [
+                'name' => 'Italian',
+                'country_codes' => ['IT', 'SM', 'CH', 'VA'],
+            ],
+            'jv' => [
+                'name' => 'Javanese',
+                'country_codes' => ['ID', 'MY'],
+            ],
+            'ja' => [
+                'name' => 'Japanese',
+                'country_codes' => ['JP'],
+            ],
+            'kn' => [
+                'name' => 'Kannada',
+                'country_codes' => ['IN'],
+            ],
+            'ks' => [
+                'name' => 'Kashmiri',
+                'country_codes' => ['IN'],
+            ],
+            'kr' => [
+                'name' => 'Kanuri',
+                'country_codes' => ['NE', 'NG'],
+            ],
+            'kk' => [
+                'name' => 'Kazakh',
+                'country_codes' => ['KZ'],
+            ],
+            'km' => [
+                'name' => 'Central Khmer',
+                'country_codes' => ['KH'],
+            ],
+            'rw' => [
+                'name' => 'Kinyarwanda',
+                'country_codes' => ['RW', 'UG', 'CD'],
+            ],
+            'ky' => [
+                'name' => 'Kirghiz',
+                'country_codes' => ['KG'],
+            ],
+            'kv' => [
+                'name' => 'Komi',
+                'country_codes' => ['RU'],
+            ],
+            'kg' => [
+                'name' => 'Kongo',
+                'country_codes' => ['AO', 'CD', 'CG'],
+            ],
+            'ko' => [
+                'name' => 'Korean',
+                'country_codes' => ['KP', 'KR'],
+            ],
+            'kj' => [
+                'name' => 'Kuanyama',
+                'country_codes' => ['AO', 'NA'],
+            ],
+            'ku' => [
+                'name' => 'Kurdish',
+                'country_codes' => ['IR', 'IQ', 'SY', 'TR'],
+            ],
+            'lo' => [
+                'name' => 'Lao',
+                'country_codes' => ['LA'],
+            ],
+            'la' => [
+                'name' => 'Latin',
+                'country_codes' => ['VA'],
+            ],
+            'lv' => [
+                'name' => 'Latvian',
+                'country_codes' => ['LV'],
+            ],
+            'li' => [
+                'name' => 'Limburgan',
+                'country_codes' => ['BE', 'DE', 'NL'],
+            ],
+            'ln' => [
+                'name' => 'Lingala',
+                'country_codes' => ['AO', 'CF', 'CD', 'CG'],
+            ],
+            'lt' => [
+                'name' => 'Lithuanian',
+                'country_codes' => ['LT'],
+            ],
+            'lu' => [
+                'name' => 'Luba-Katanga',
+                'country_codes' => ['CD'],
+            ],
+            'lb' => [
+                'name' => 'Luxembourgish',
+                'country_codes' => ['LU'],
+            ],
+            'mk' => [
+                'name' => 'Macedonian',
+                'country_codes' => ['MK'],
+            ],
+            'mh' => [
+                'name' => 'Marshallese',
+                'country_codes' => ['MH'],
+            ],
+            'ml' => [
+                'name' => 'Malayalam',
+                'country_codes' => ['IN'],
+            ],
+            'mr' => [
+                'name' => 'Marathi',
+                'country_codes' => ['IN'],
+            ],
+            'mg' => [
+                'name' => 'Malagasy',
+                'country_codes' => ['MG'],
+            ],
+            'mt' => [
+                'name' => 'Maltese',
+                'country_codes' => ['MT'],
+            ],
+            'mn' => [
+                'name' => 'Mongolian',
+                'country_codes' => ['MN'],
+            ],
+            'na' => [
+                'name' => 'Nauru',
+                'country_codes' => ['NR'],
+            ],
+            'nv' => [
+                'name' => 'Navajo',
+                'country_codes' => ['US'],
+            ],
+            'nr' => [
+                'name' => 'Ndebele, South',
+                'country_codes' => ['ZA'],
+            ],
+            'nd' => [
+                'name' => 'Ndebele, North',
+                'country_codes' => ['ZW'],
+            ],
+            'ng' => [
+                'name' => 'Ndonga',
+                'country_codes' => ['NA'],
+            ],
+            'ne' => [
+                'name' => 'Nepali',
+                'country_codes' => ['NP'],
+            ],
+            'nn' => [
+                'name' => 'Norwegian Nynorsk',
+                'country_codes' => ['NO'],
+            ],
+            'nb' => [
+                'name' => 'Norwegian Bokmål',
+                'country_codes' => ['NO'],
+            ],
+            'no' => [
+                'name' => 'Norwegian',
+                'country_codes' => ['NO'],
+            ],
+            'ny' => [
+                'name' => 'Chichewa',
+                'country_codes' => ['MW', 'ZM'],
+            ],
+            'oc' => [
+                'name' => 'Occitan',
+                'country_codes' => ['FR', 'ES', 'IT'],
+            ],
+            'oj' => [
+                'name' => 'Ojibwa',
+                'country_codes' => ['CA', 'US'],
+            ],
+            'or' => [
+                'name' => 'Oriya',
+                'country_codes' => ['IN'],
+            ],
+            'om' => [
+                'name' => 'Oromo',
+                'country_codes' => ['ET', 'KE'],
+            ],
+            'os' => [
+                'name' => 'Ossetian',
+                'country_codes' => ['GE', 'RU'],
+            ],
+            'pa' => [
+                'name' => 'Panjabi',
+                'country_codes' => ['IN', 'PK'],
+            ],
+            'pi' => [
+                'name' => 'Pali',
+                'country_codes' => ['MM', 'LK'],
+            ],
+            'pl' => [
+                'name' => 'Polish',
+                'country_codes' => ['PL'],
+            ],
+            'pt' => [
+                'name' => 'Portuguese',
+                'country_codes' => ['AO', 'BR', 'CV', 'GQ', 'GW', 'MO', 'MZ', 'PT', 'ST', 'TL'],
+            ],
+            'ps' => [
+                'name' => 'Pashto',
+                'country_codes' => ['AF', 'PK'],
+            ],
+            'qu' => [
+                'name' => 'Quechua',
+                'country_codes' => ['AR', 'BO', 'EC', 'PE'],
+            ],
+            'rm' => [
+                'name' => 'Romansh',
+                'country_codes' => ['CH'],
+            ],
+            'ro' => [
+                'name' => 'Romanian',
+                'country_codes' => ['MD', 'RO'],
+            ],
+            'rn' => [
+                'name' => 'Rundi',
+                'country_codes' => ['BI'],
+            ],
+            'ru' => [
+                'name' => 'Russian',
+                'country_codes' => ['BY', 'KZ', 'KG', 'MD', 'RU', 'UA'],
+            ],
+            'sg' => [
+                'name' => 'Sango',
+                'country_codes' => ['CF', 'CD'],
+            ],
+            'sa' => [
+                'name' => 'Sanskrit',
+                'country_codes' => ['IN'],
+            ],
+            'si' => [
+                'name' => 'Sinhala',
+                'country_codes' => ['LK'],
+            ],
+            'sk' => [
+                'name' => 'Slovak',
+                'country_codes' => ['SK'],
+            ],
+            'sl' => [
+                'name' => 'Slovenian',
+                'country_codes' => ['SI'],
+            ],
+            'se' => [
+                'name' => 'Northern Sami',
+                'country_codes' => ['NO', 'SE', 'FI'],
+            ],
+            'sm' => [
+                'name' => 'Samoan',
+                'country_codes' => ['AS', 'WS'],
+            ],
+            'sn' => [
+                'name' => 'Shona',
+                'country_codes' => ['ZW', 'MZ'],
+            ],
+            'sd' => [
+                'name' => 'Sindhi',
+                'country_codes' => ['PK', 'IN'],
+            ],
+            'so' => [
+                'name' => 'Somali',
+                'country_codes' => ['DJ', 'ET', 'SO', 'KE'],
+            ],
+            'st' => [
+                'name' => 'Sotho, Southern',
+                'country_codes' => ['LS', 'ZA'],
+            ],
+            'es' => [
+                'name' => 'Spanish',
+                'country_codes' => ['AR', 'BO', 'CL', 'CO', 'CR', 'CU', 'DO', 'EC', 'SV', 'GQ', 'GT', 'HN', 'MX', 'NI', 'PA', 'PY', 'PE', 'PR', 'ES', 'UY', 'VE'],
+            ],
+            'sc' => [
+                'name' => 'Sardinian',
+                'country_codes' => ['IT'],
+            ],
+            'sr' => [
+                'name' => 'Serbian',
+                'country_codes' => ['BA', 'RS', 'ME'],
+            ],
+            'ss' => [
+                'name' => 'Swati',
+                'country_codes' => ['SZ', 'ZA'],
+            ],
+            'su' => [
+                'name' => 'Sundanese',
+                'country_codes' => ['ID'],
+            ],
+            'sw' => [
+                'name' => 'Swahili',
+                'country_codes' => ['CD', 'KE', 'RW', 'TZ', 'UG'],
+            ],
+            'sv' => [
+                'name' => 'Swedish',
+                'country_codes' => ['SE', 'FI'],
+            ],
+            'ty' => [
+                'name' => 'Tahitian',
+                'country_codes' => ['PF'],
+            ],
+            'ta' => [
+                'name' => 'Tamil',
+                'country_codes' => ['IN', 'LK', 'SG'],
+            ],
+            'tt' => [
+                'name' => 'Tatar',
+                'country_codes' => ['RU'],
+            ],
+            'te' => [
+                'name' => 'Telugu',
+                'country_codes' => ['IN'],
+            ],
+            'tg' => [
+                'name' => 'Tajik',
+                'country_codes' => ['TJ'],
+            ],
+            'tl' => [
+                'name' => 'Tagalog',
+                'country_codes' => ['PH'],
+            ],
+            'th' => [
+                'name' => 'Thai',
+                'country_codes' => ['TH'],
+            ],
+            'bo' => [
+                'name' => 'Tibetan',
+                'country_codes' => ['CN', 'IN'],
+            ],
+            'ti' => [
+                'name' => 'Tigrinya',
+                'country_codes' => ['ER', 'ET'],
+            ],
+            'to' => [
+                'name' => 'Tonga',
+                'country_codes' => ['TO'],
+            ],
+            'tn' => [
+                'name' => 'Tswana',
+                'country_codes' => ['BW', 'ZA'],
+            ],
+            'ts' => [
+                'name' => 'Tsonga',
+                'country_codes' => ['MZ', 'ZA'],
+            ],
+            'tk' => [
+                'name' => 'Turkmen',
+                'country_codes' => ['TM'],
+            ],
+            'tr' => [
+                'name' => 'Turkish',
+                'country_codes' => ['TR', 'CY'],
+            ],
+            'tw' => [
+                'name' => 'Twi',
+                'country_codes' => ['GH'],
+            ],
+            'ug' => [
+                'name' => 'Uighur',
+                'country_codes' => ['CN'],
+            ],
+            'uk' => [
+                'name' => 'Ukrainian',
+                'country_codes' => ['UA'],
+            ],
+            'ur' => [
+                'name' => 'Urdu',
+                'country_codes' => ['IN', 'PK'],
+            ],
+            'uz' => [
+                'name' => 'Uzbek',
+                'country_codes' => ['UZ'],
+            ],
+            've' => [
+                'name' => 'Venda',
+                'country_codes' => ['ZA'],
+            ],
+            'vi' => [
+                'name' => 'Vietnamese',
+                'country_codes' => ['VN'],
+            ],
+            'vo' => [
+                'name' => 'Volapük',
+                'country_codes' => [],
+            ],
+            'wa' => [
+                'name' => 'Walloon',
+                'country_codes' => ['BE'],
+            ],
+            'wo' => [
+                'name' => 'Wolof',
+                'country_codes' => ['SN'],
+            ],
+            'xh' => [
+                'name' => 'Xhosa',
+                'country_codes' => ['ZA'],
+            ],
+            'yi' => [
+                'name' => 'Yiddish',
+                'country_codes' => ['DE', 'IL', 'PL', 'UA', 'US'],
+            ],
+            'yo' => [
+                'name' => 'Yoruba',
+                'country_codes' => ['NG', 'BJ'],
+            ],
+            'za' => [
+                'name' => 'Zhuang',
+                'country_codes' => ['CN'],
+            ],
+            'zu' => [
+                'name' => 'Zulu',
+                'country_codes' => ['ZA'],
+            ],
         ];
     }
 }
