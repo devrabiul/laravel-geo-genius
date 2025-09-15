@@ -22,7 +22,7 @@ It automatically retrieves detailed IP-based location data, detects the user’s
 
 ## 🚀 Live Demo
 
-👉 [Try the Live Demo](https://packages.rixetbd.com/laravel-geo-genius)
+👉 [Try the Live Demo](https://packages.rixetbd.com/devrabiul/laravel-geo-genius)
 
 ![Live Demo Thumbnail](https://packages.rixetbd.com/storage/app/public/package/devrabiul/laravel-geo-genius.webp)
 
