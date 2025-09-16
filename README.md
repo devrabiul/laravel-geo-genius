@@ -85,19 +85,20 @@ $ip = $geo->getClientIp();
 $locationData = $geo->locateVisitor();
 ```
 
----
-
 ## 🌐 Multilingual & Translation
 
-Built-in auto translation and number conversion:
+Built-in auto translation and number conversion **global helpers**:
 
 ```php
-use function Devrabiul\LaravelGeoGenius\geniusTrans;
-use function Devrabiul\LaravelGeoGenius\geniusTranslateNumber;
-
-echo geniusTrans('welcome_message');
-echo geniusTranslateNumber(12345); // Bengali digits if locale is 'bn'
+geniusTrans('welcome_message');
+geniusTranslateNumber(12345); // Bengali digits if locale is 'bn'
 ```
+
+✅ **Use anywhere** — these helpers work in controllers, services and Blade templates (`{{ geniusTrans('welcome_message') }}`).
+
+✅ **Automatic detection** — `geniusTrans()` automatically detects the user’s language based on their Geo-IP.
+
+✅ **Override anytime** — you can also update / set the current user language manually if a matching language file exists under `resources/lang`.
 
 Configure in `config/laravel-geo-genius.php`:
 
