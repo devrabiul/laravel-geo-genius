@@ -1,6 +1,6 @@
 ---
 name: Bug report
-about: Report a bug to help us improve Laravel Toaster Magic
+about: Report a bug
 title: ''
 labels: bug
 assignees: ''
