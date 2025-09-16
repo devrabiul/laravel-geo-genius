@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Session;
+use Illuminate\Support\Facades\Cache;
 
 trait LanguageTrait
 {
@@ -45,29 +46,6 @@ trait LanguageTrait
         return array_key_exists($locale, self::getAllLanguageNames()) ? $locale : 'en';
     }
 
-    public static function updateNewMessages($local, $cleanKey, $action = 'add')
-    {
-        $config = config('laravel-geo-genius', []);
-        $translateConfig = $config['translate'];
-        $newMessagesArray = include(base_path('resources/lang/' . $local . '/new-messages.php'));
-
-        $translatedText = [];
-        if (App::getLocale() != 'en' && ($translateConfig['auto_translate'] ?? false) && (!($action == 'update') || array_key_exists($cleanKey, $newMessagesArray))) {
-            try {
-                $languageService = new LanguageService();
-                $translatedText = $languageService->translateAndUpdateNewMessages(
-                    translatedMessages: include(base_path('resources/lang/' . $local . '/messages.php')),
-                    newMessagesArray: include(base_path('resources/lang/' . $local . '/new-messages.php')),
-                    textKey: $cleanKey,
-                    languageCode: $local
-                );
-            } catch (\Exception $exception) {
-            }
-        }
-
-        return $translatedText['translatedText'] ?? null;
-    }
-
     public static function geniusTranslateMessageValueByKey(string $local, string|null $key): mixed
     {
         if (
@@ -85,7 +63,10 @@ trait LanguageTrait
             $translatedMessagesArray = include(base_path('resources/lang/' . $local . '/messages.php'));
             $newMessagesArray = include(base_path('resources/lang/' . $local . '/new-messages.php'));
 
-            self::updateNewMessages($local, $cleanKey, 'update');
+            Cache::remember("update_geo_translate_new_messages", now()->addMinutes(2), function () use ($local) {
+                $languageService = new LanguageService();
+                $languageService->getAllMessagesTranslateProcess(languageCode: $local, count: 5);
+            });
 
             if (!array_key_exists($cleanKey, $translatedMessagesArray) && !array_key_exists($cleanKey, $newMessagesArray)) {
                 $newMessagesArray[$cleanKey] = $processedKey;
@@ -101,7 +82,7 @@ trait LanguageTrait
                 file_put_contents($targetPath, $languageFileContents);
 
                 LanguageTrait::geniusSortTranslateArrayByKey(targetPath: $targetPath);
-                $message = self::updateNewMessages($local, $cleanKey, 'add') ?? $processedKey;
+                $message = $processedKey;
             } elseif (array_key_exists($cleanKey, $translatedMessagesArray)) {
                 $message = __('messages.' . $cleanKey);
             } elseif (array_key_exists($cleanKey, $newMessagesArray)) {
@@ -122,6 +103,19 @@ trait LanguageTrait
         $remainingMessagesFileContents = "<?php\n\nreturn [\n";
         foreach ($getMessagesArray as $newMsgKey => $newMsgValue) {
             $remainingMessagesFileContents .= "\t\"" . $newMsgKey . "\" => \"" . $newMsgValue . "\",\n";
+        }
+        $remainingMessagesFileContents .= "];\n";
+        file_put_contents($targetPath, $remainingMessagesFileContents);
+    }
+
+    function getAddTranslateNewKey($sourcePath, $targetPath, $translatedKey): void
+    {
+        $getNewMessagesArray = include($sourcePath);
+        $remainingMessagesFileContents = "<?php\n\nreturn [\n";
+        foreach ($getNewMessagesArray as $newMsgKey => $newMsgValue) {
+            if ($newMsgKey != $translatedKey) {
+                $remainingMessagesFileContents .= "\t\"" . $newMsgKey . "\" => \"" . $newMsgValue . "\",\n";
+            }
         }
         $remainingMessagesFileContents .= "];\n";
         file_put_contents($targetPath, $remainingMessagesFileContents);

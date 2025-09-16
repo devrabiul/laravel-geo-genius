@@ -4,6 +4,7 @@ namespace Devrabiul\LaravelGeoGenius;
 
 use Devrabiul\LaravelGeoGenius\Commands\AddNewLanguage;
 use Devrabiul\LaravelGeoGenius\Commands\AddTimezoneColumn;
+use Devrabiul\LaravelGeoGenius\Commands\TranslateLanguage;
 use Devrabiul\LaravelGeoGenius\Services\GeoLocationService;
 use Devrabiul\LaravelGeoGenius\Services\LanguageService;
 use Devrabiul\LaravelGeoGenius\Services\TimezoneService;
@@ -105,6 +106,7 @@ class LaravelGeoGeniusServiceProvider extends ServiceProvider
         $this->commands([
             AddTimezoneColumn::class,
             AddNewLanguage::class,
+            TranslateLanguage::class,
         ]);
 
         $this->app->singleton(GeoLocationService::class);

@@ -22,7 +22,7 @@ It automatically retrieves detailed IP-based location data, detects the user’s
 
 ## 🚀 Live Demo
 
-👉 [Try the Live Demo](https://packages.rixetbd.com/devrabiul/laravel-geo-genius)
+👉 [Try the Live Demo](https://packages.rixetbd.com/laravel-geo-genius)
 
 ![Live Demo Thumbnail](https://packages.rixetbd.com/storage/app/public/package/devrabiul/laravel-geo-genius.webp)
 
@@ -85,20 +85,19 @@ $ip = $geo->getClientIp();
 $locationData = $geo->locateVisitor();
 ```
 
+---
+
 ## 🌐 Multilingual & Translation
 
-Built-in auto translation and number conversion **global helpers**:
+Built-in auto translation and number conversion:
 
 ```php
-geniusTrans('welcome_message');
-geniusTranslateNumber(12345); // Bengali digits if locale is 'bn'
+use function Devrabiul\LaravelGeoGenius\geniusTrans;
+use function Devrabiul\LaravelGeoGenius\geniusTranslateNumber;
+
+echo geniusTrans('welcome_message');
+echo geniusTranslateNumber(12345); // Bengali digits if locale is 'bn'
 ```
-
-✅ **Use anywhere** — these helpers work in controllers, services and Blade templates (`{{ geniusTrans('welcome_message') }}`).
-
-✅ **Automatic detection** — `geniusTrans()` automatically detects the user’s language based on their Geo-IP.
-
-✅ **Override anytime** — you can also update / set the current user language manually if a matching language file exists under `resources/lang`.
 
 Configure in `config/laravel-geo-genius.php`:
 
@@ -107,6 +106,39 @@ Configure in `config/laravel-geo-genius.php`:
     'auto_translate' => true,
 ],
 ```
+
+## 📝 Translate Language Messages
+
+Laravel GeoGenius present an **artisan command** to help you translate language messages automatically.
+
+| Command                                       | Description                                                  |
+| --------------------------------------------- | ------------------------------------------------------------ |
+| `php artisan geo:translate-language {locale}` | Translates the `new-messages.php` file for the given locale. |
+
+### When to Use
+
+* You’ve already added a new language using `php artisan geo:add-language {locale}`.
+* There’s a `new-messages.php` file under `resources/lang/{locale}` with untranslated strings.
+
+### Example
+
+```bash
+# Translate missing Bengali strings (5 at a time by default)
+php artisan geo:translate-language bn
+```
+
+You can also specify how many strings to translate per run using `--count`:
+
+```bash
+php artisan geo:translate-language bn --count=20
+```
+
+This will:
+
+* Check if `resources/lang/{locale}/new-messages.php` exists.
+* Automatically translate up to `count` messages for the given locale.
+* Save the translated strings back to the same file.
+
 
 ## 🌐 Change Current User Language
 
@@ -195,11 +227,9 @@ Laravel GeoGenius makes it trivial to initialise a **country-aware phone input f
 </head>
 <body>
 
-    // must be use type="tel" in your phone input
-    <input id="phone" type="tel" name="phone">
-    
-    // Before Body close tag
     {!! laravelGeoGenius()->initIntlPhoneInput() !!}
+
+    <input id="phone" type="tel" name="phone">
 </body>
 </html>
 ```
