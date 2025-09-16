@@ -2,13 +2,9 @@
 
 namespace Devrabiul\LaravelGeoGenius\Trait;
 
-use Devrabiul\LaravelGeoGenius\Services\GeoLocationService;
-use Devrabiul\LaravelGeoGenius\Services\LanguageService;
-use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\File;
-use Illuminate\Support\Facades\App;
-use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Facades\Cache;
+use Devrabiul\LaravelGeoGenius\Services\LanguageService;
 
 trait LanguageTrait
 {
@@ -63,11 +59,6 @@ trait LanguageTrait
             $translatedMessagesArray = include(base_path('resources/lang/' . $local . '/messages.php'));
             $newMessagesArray = include(base_path('resources/lang/' . $local . '/new-messages.php'));
 
-            Cache::remember("update_geo_translate_new_messages", now()->addMinutes(2), function () use ($local) {
-                $languageService = new LanguageService();
-                $languageService->getAllMessagesTranslateProcess(languageCode: $local, count: 5);
-            });
-
             if (!array_key_exists($cleanKey, $translatedMessagesArray) && !array_key_exists($cleanKey, $newMessagesArray)) {
                 $newMessagesArray[$cleanKey] = $processedKey;
 
@@ -108,7 +99,7 @@ trait LanguageTrait
         file_put_contents($targetPath, $remainingMessagesFileContents);
     }
 
-    function getAddTranslateNewKey($sourcePath, $targetPath, $translatedKey): void
+    public static function getAddTranslateNewKey($sourcePath, $targetPath, $translatedKey): void
     {
         $getNewMessagesArray = include($sourcePath);
         $remainingMessagesFileContents = "<?php\n\nreturn [\n";
@@ -177,6 +168,57 @@ trait LanguageTrait
         return 'en';
     }
 
+    public static function getAllMessagesTranslateProcess(string $languageCode, int $count = 999999999): array
+    {
+        $newMessagesArray = include(base_path('resources/lang/' . $languageCode . '/new-messages.php'));
+        $translatedMessagesArray = include(base_path('resources/lang/' . $languageCode . '/messages.php'));
+        $response = [
+            'status' => 0,
+            'message' => geniusTranslate("Cannot_translate_now"),
+            'due_message' => count($newMessagesArray),
+        ];
+
+        $translateCount = 0;
+        if ($newMessagesArray) {
+            foreach ($newMessagesArray as $key => $value) {
+                if ($translateCount < $count) {
+                    $languageSerive = new LanguageService();
+                    $translated = $languageSerive->autoTranslator($key, 'en', $languageCode);
+                    if ($translated !== null) {
+                        $translatedMessagesArray[$key] = preg_replace('/\s+/', ' ', LanguageTrait::geniusRemoveInvalidCharacters($translated));
+                        $translatedKey = $key;
+
+                        $messagesFileContents = "<?php\n\nreturn [\n";
+                        foreach ($translatedMessagesArray as $k => $tmaValue) {
+                            $messagesFileContents .= "\t\"" . $k . "\" => \"" . $tmaValue . "\",\n";
+                        }
+                        $messagesFileContents .= "];\n";
+                        file_put_contents(base_path('resources/lang/' . $languageCode . '/messages.php'), $messagesFileContents);
+                        LanguageTrait::geniusSortTranslateArrayByKey(targetPath: base_path('resources/lang/' . $languageCode . '/messages.php'));
+
+                        $sourcePath = base_path('resources/lang/' . $languageCode . '/new-messages.php');
+                        $targetPath = base_path('resources/lang/' . $languageCode . '/new-messages.php');
+                        LanguageTrait::getAddTranslateNewKey($sourcePath, $targetPath, $translatedKey);
+                        LanguageTrait::geniusSortTranslateArrayByKey(targetPath: $targetPath);
+                        $translateCount++;
+                        $response = [
+                            'status' => 1,
+                            'message' => geniusTranslate("Translate_Successful"),
+                            'due_message' => count(include(base_path('resources/lang/' . $languageCode . '/new-messages.php'))),
+                        ];
+                    }
+                }
+            }
+        } else {
+            $response = [
+                'status' => 1,
+                'message' => geniusTranslate("All_Messages_are_translated"),
+                'due_message' => count(include(base_path('resources/lang/' . $languageCode . '/new-messages.php'))),
+            ];
+        }
+
+        return $response;
+    }
 
     public static function getAllLanguageNames(): array
     {

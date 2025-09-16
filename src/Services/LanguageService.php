@@ -133,57 +133,6 @@ class LanguageService
         ];
     }
 
-    public function getAllMessagesTranslateProcess(string $languageCode, int $count = 999999999): array
-    {
-        $newMessagesArray = include(base_path('resources/lang/' . $languageCode . '/new-messages.php'));
-        $translatedMessagesArray = include(base_path('resources/lang/' . $languageCode . '/messages.php'));
-        $response = [
-            'status' => 0,
-            'message' => geniusTranslate("Cannot_translate_now"),
-            'due_message' => count($newMessagesArray),
-        ];
-
-        $translateCount = 0;
-        if ($newMessagesArray) {
-            foreach ($newMessagesArray as $key => $value) {
-                if ($translateCount < $count) {
-                    $translated = $this->autoTranslator($key, 'en', $languageCode);
-                    if ($translated !== null) {
-                        $translatedMessagesArray[$key] = preg_replace('/\s+/', ' ', LanguageTrait::geniusRemoveInvalidCharacters($translated));
-                        $translatedKey = $key;
-
-                        $messagesFileContents = "<?php\n\nreturn [\n";
-                        foreach ($translatedMessagesArray as $k => $tmaValue) {
-                            $messagesFileContents .= "\t\"" . $k . "\" => \"" . $tmaValue . "\",\n";
-                        }
-                        $messagesFileContents .= "];\n";
-                        file_put_contents(base_path('resources/lang/' . $languageCode . '/messages.php'), $messagesFileContents);
-                        LanguageTrait::geniusSortTranslateArrayByKey(targetPath: base_path('resources/lang/' . $languageCode . '/messages.php'));
-
-                        $sourcePath = base_path('resources/lang/' . $languageCode . '/new-messages.php');
-                        $targetPath = base_path('resources/lang/' . $languageCode . '/new-messages.php');
-                        self::getAddTranslateNewKey($sourcePath, $targetPath, $translatedKey);
-                        LanguageTrait::geniusSortTranslateArrayByKey(targetPath: $targetPath);
-                        $translateCount++;
-                        $response = [
-                            'status' => 1,
-                            'message' => geniusTranslate("Translate_Successful"),
-                            'due_message' => count(include(base_path('resources/lang/' . $languageCode . '/new-messages.php'))),
-                        ];
-                    }
-                }
-            }
-        } else {
-            $response = [
-                'status' => 1,
-                'message' => geniusTranslate("All_Messages_are_translated"),
-                'due_message' => count(include(base_path('resources/lang/' . $languageCode . '/new-messages.php'))),
-            ];
-        }
-
-        return $response;
-    }
-
     function writeTranslationFile($languageCode, $fileName, $messagesData): void
     {
         $messagesString = "<?php\n\nreturn [\n";

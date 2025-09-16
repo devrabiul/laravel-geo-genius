@@ -4,7 +4,7 @@ namespace Devrabiul\LaravelGeoGenius\Commands;
 
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\File;
-use Devrabiul\LaravelGeoGenius\Services\LanguageService;
+use Devrabiul\LaravelGeoGenius\Trait\LanguageTrait;
 
 class TranslateLanguage extends Command
 {
@@ -38,11 +38,7 @@ class TranslateLanguage extends Command
 
         try {
             $this->info("🔄 Translating '{$locale}' language strings (limit: {$count}) …");
-
-            $languageService = app(LanguageService::class);
-
-            // You can wrap in progress bar if LanguageService returns iterable
-            $languageService->getAllMessagesTranslateProcess(
+            $result = LanguageTrait::getAllMessagesTranslateProcess(
                 languageCode: $locale,
                 count: $count
             );
