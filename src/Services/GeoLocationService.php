@@ -20,7 +20,7 @@ class GeoLocationService
 
     public function getClientIp()
     {
-        $geoIPSessionKey = 'visitor_geolocation_ip_for_' . str_replace('.', '_', request()->ip());
+        $geoIPSessionKey = 'visitor_geolocation_ip_for_' . str_replace('.', '_', request()->ip()) . '_' . date('Y');
 
         $config = config('laravel-geo-genius', []);
         $cacheConfig = $config['cache'] ?? [];
@@ -47,7 +47,7 @@ class GeoLocationService
         $cacheConfig = $config['cache'] ?? [];
 
         $ip = $this->getClientIp();
-        $geoLocationSessionKey = 'visitor_geolocation_for_' . str_replace('.', '_', $ip);
+        $geoLocationSessionKey = 'visitor_geolocation_for_' . str_replace('.', '_', $ip) . '_' . date('Y');
 
         if ($this->isInternetAvailable()) {
             return (array) Cache::remember($geoLocationSessionKey, ($cacheConfig['ttl_minutes'] ?? now()->addDays(7)), function () use ($ip) {
