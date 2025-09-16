@@ -1,6 +1,6 @@
 ---
 name: Feature request
-about: Suggest an idea or enhancement for Laravel Toaster Magic
+about: Suggest an idea or enhancement
 title: ''
 labels: enhancement
 assignees: ''
