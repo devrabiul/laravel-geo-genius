@@ -42,51 +42,6 @@ trait LanguageTrait
         return array_key_exists($locale, self::getAllLanguageNames()) ? $locale : 'en';
     }
 
-    public static function geniusTranslateMessageValueByKey(string $local, string|null $key): mixed
-    {
-        if (
-            !File::exists(base_path('resources/lang/' . $local . '/messages.php')) ||
-            !File::exists(base_path('resources/lang/' . $local . '/new-messages.php'))
-        ) {
-            self::getLanguageAddProcess(lang: $local);
-        }
-
-        try {
-            $escapedKey = str_replace("'", "/'", $key);
-            $cleanKey = LanguageTrait::geniusRemoveInvalidCharacters($escapedKey);
-            $processedKey = str_replace('_', ' ', LanguageTrait::geniusRemoveInvalidCharacters(str_replace("\'", "'", $key)));
-
-            $translatedMessagesArray = include(base_path('resources/lang/' . $local . '/messages.php'));
-            $newMessagesArray = include(base_path('resources/lang/' . $local . '/new-messages.php'));
-
-            if (!array_key_exists($cleanKey, $translatedMessagesArray) && !array_key_exists($cleanKey, $newMessagesArray)) {
-                $newMessagesArray[$cleanKey] = $processedKey;
-
-                // Build the PHP file contents
-                $languageFileContents = "<?php\n\nreturn [\n";
-                foreach ($newMessagesArray as $languageKey => $value) {
-                    $languageFileContents .= "\t\"" . $languageKey . "\" => \"" . $value . "\",\n";
-                }
-                $languageFileContents .= "];\n";
-
-                $targetPath = base_path('resources/lang/' . $local . '/new-messages.php');
-                file_put_contents($targetPath, $languageFileContents);
-
-                LanguageTrait::geniusSortTranslateArrayByKey(targetPath: $targetPath);
-                $message = $processedKey;
-            } elseif (array_key_exists($cleanKey, $translatedMessagesArray)) {
-                $message = __('messages.' . $cleanKey);
-            } elseif (array_key_exists($cleanKey, $newMessagesArray)) {
-                $message = __('new-messages.' . $cleanKey);
-            } else {
-                $message = __('messages.' . $cleanKey);;
-            }
-        } catch (\Exception $exception) {
-            $message = str_replace('_', ' ', LanguageTrait::geniusRemoveInvalidCharacters(str_replace("\'", "'", $key)));
-        }
-        return $message;
-    }
-
     public static function geniusSortTranslateArrayByKey($targetPath): void
     {
         $getMessagesArray = include($targetPath);
