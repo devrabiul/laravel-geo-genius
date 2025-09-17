@@ -18,6 +18,11 @@ It automatically retrieves detailed IP-based location data, detects the user’s
 [![Buy us a tree](https://img.shields.io/badge/Treeware-%F0%9F%8C%B3-lightgreen)](https://plant.treeware.earth/devrabiul/laravel-geo-genius)
 ![GitHub Repo stars](https://img.shields.io/github/stars/devrabiul/laravel-geo-genius?style=social)
 
+## Featured On
+
+I’m proud to share that **GeoGenius** was featured on **Laravel News** in their article: *“GeoGenius Package for Laravel”*.  
+Read it here: [GeoGenius Package for Laravel — Laravel News](https://laravel-news.com/geogenius-package-for-laravel)
+
 ---
 
 ## 🚀 Live Demo
