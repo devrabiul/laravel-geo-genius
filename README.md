@@ -107,38 +107,38 @@ Configure in `config/laravel-geo-genius.php`:
 ],
 ```
 
-## 📝 Translate Language Messages
+## 📝 Translation Artisan Commands
 
-Laravel GeoGenius present an **artisan command** to help you translate language messages automatically.
+Laravel GeoGenius provides a set of helpful artisan commands to manage languages and translations easily:
 
-| Command                                       | Description                                                  |
-| --------------------------------------------- | ------------------------------------------------------------ |
-| `php artisan geo:translate-language {locale}` | Translates the `new-messages.php` file for the given locale. |
+| Command                                                         | Description                                                                  |
+| --------------------------------------------------------------- | ---------------------------------------------------------------------------- |
+| `php artisan geo:add-language {locale}`                         | Create a new language directory with starter files (e.g. `en`, `bn`).        |
+| `php artisan geo:translations-generate --locale={locale}`       | Scan your app for `translate('...')` calls and auto-generate `messages.php`. |
+| `php artisan geo:translate-language {locale} --count={n}`       | Translate up to `n` messages from `new-messages.php` into `messages.php`.    |
+| `php artisan geo:translate-language-all {locale} --count={n}`   | Keep running batch translations until all strings are translated.            |
+| `php artisan geo:translate-language-batch {locale} --count={n}` | Translate a fixed batch of `n` messages at a time.                           |
 
-### When to Use
-
-* You’ve already added a new language using `php artisan geo:add-language {locale}`.
-* There’s a `new-messages.php` file under `resources/lang/{locale}` with untranslated strings.
-
-### Example
-
-```bash
-# Translate missing Bengali strings (5 at a time by default)
-php artisan geo:translate-language bn
-```
-
-You can also specify how many strings to translate per run using `--count`:
+### Examples
 
 ```bash
-php artisan geo:translate-language bn --count=20
+# 1. Add English language support
+php artisan geo:add-language en
+
+# 2. Generate messages.php file from all translate() calls
+php artisan geo:translations-generate --locale=en
+
+# 3. Translate up to 100 strings for English
+php artisan geo:translate-language en --count=100
+
+# 4. Keep translating until all English strings are done (300 at a time)
+php artisan geo:translate-language-all en --count=300
+
+# 5. Translate 50 strings in a batch (useful for automation)
+php artisan geo:translate-language-batch en --count=50
 ```
 
-This will:
-
-* Check if `resources/lang/{locale}/new-messages.php` exists.
-* Automatically translate up to `count` messages for the given locale.
-* Save the translated strings back to the same file.
-
+---
 
 ## 🌐 Change Current User Language
 
