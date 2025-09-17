@@ -96,7 +96,7 @@ class TranslateService
      * @param array $options HTTP client configuration options
      * @param TokenProviderInterface|null $tokenProvider
      */
-    public function __construct(string $target = 'en', string $source = null, array $options = [], TokenProviderInterface $tokenProvider = null)
+    public function __construct(string $target = 'en', ?string $source = null, array $options = [], ?TokenProviderInterface $tokenProvider = null)
     {
         $this->client = new Client();
         $this->setTokenProvider($tokenProvider ?? new GoogleTokenGenerator)
@@ -201,7 +201,7 @@ class TranslateService
      * @throws TranslationRequestException If any other HTTP related error occurs
      * @throws TranslationDecodingException If response JSON cannot be decoded
      */
-    public static function trans(string $string, string $target = 'en', string $source = null, array $options = [], TokenProviderInterface $tokenProvider = null): ?string
+    public static function trans(string $string, string $target = 'en', ?string $source = null, array $options = [], ?TokenProviderInterface $tokenProvider = null): ?string
     {
         return (new self)
             ->setTokenProvider($tokenProvider ?? new GoogleTokenGenerator)
@@ -277,6 +277,51 @@ class TranslateService
         }
 
         return (string) $responseArray[0];
+    }
+
+    /**
+     * Translate multiple strings in a single request.
+     *
+     * @param array<string, string> $strings Associative array of strings to translate
+     * @return array<string, string> Associative array of translated strings
+     *
+     * @throws LargeTextException
+     * @throws RateLimitException
+     * @throws TranslationRequestException
+     * @throws TranslationDecodingException
+     */
+    public function translateBatch(array $strings): array
+    {
+        if (empty($strings)) {
+            return [];
+        }
+
+        // Join all strings with newlines
+        $joinedText = implode("\n", array_values($strings));
+
+        // Get response array
+        $responseArray = $this->getResponse($joinedText);
+
+        // Flatten response
+        $translatedText = '';
+        if (is_array($responseArray[0])) {
+            foreach ($responseArray[0] as $item) {
+                $translatedText .= $item[0];
+            }
+        } elseif (is_string($responseArray[0])) {
+            $translatedText = $responseArray[0];
+        }
+
+        // Split back into array of translated strings
+        $translatedLines = explode("\n", $translatedText);
+
+        $result = [];
+        $keys = array_keys($strings);
+        foreach ($keys as $index => $key) {
+            $result[$key] = $translatedLines[$index] ?? $strings[$key];
+        }
+
+        return $result;
     }
 
     /**

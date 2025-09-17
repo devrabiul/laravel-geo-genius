@@ -6,15 +6,39 @@ use Devrabiul\LaravelGeoGenius\Trait\LanguageTrait;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\File;
 
+/**
+ * Class AddNewLanguage
+ *
+ * This command adds a new language to the LaravelGeoGenius setup.
+ * It ensures that the language directory and files are created
+ * only if they do not already exist and if the locale code is valid.
+ *
+ * Usage example:
+ *  php artisan geo:add-language en
+ *
+ * @package Devrabiul\LaravelGeoGenius\Commands
+ */
 class AddNewLanguage extends Command
 {
     /**
-     * Usage: php artisan geo:add-language en
+     * The name and signature of the console command.
+     *
+     * @var string
      */
     protected $signature = 'geo:add-language {locale : The locale code, e.g. en, bn}';
 
+    /**
+     * The console command description.
+     *
+     * @var string
+     */
     protected $description = 'Add a new language to your LaravelGeoGenius setup if it does not exist';
 
+    /**
+     * Execute the console command.
+     *
+     * @return void
+     */
     public function handle(): void
     {
         $locale = $this->argument('locale');

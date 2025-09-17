@@ -1,6 +1,6 @@
 ---
 name: Bug report
-about: Report a bug to help us improve Laravel Toaster Magic
+about: Report a bug to help us improve Laravel GeoGenius
 title: ''
 labels: bug
 assignees: ''
@@ -24,7 +24,7 @@ A clear and concise description of what you expected to happen.
 If applicable, add screenshots to help explain your problem.
 
 ## Environment
-- Laravel Toaster Magic version: [e.g., 1.0.0]
+- Laravel GeoGenius version: [e.g., 1.0.0]
 - Laravel version: [e.g., 10.x]
 - PHP version: [e.g., 8.2]
 - Operating System: [e.g., Ubuntu 22.04]

@@ -4,19 +4,15 @@ namespace Devrabiul\LaravelGeoGenius;
 
 use Devrabiul\LaravelGeoGenius\Commands\AddNewLanguage;
 use Devrabiul\LaravelGeoGenius\Commands\AddTimezoneColumn;
+use Devrabiul\LaravelGeoGenius\Commands\GenerateTranslationFiles;
+use Devrabiul\LaravelGeoGenius\Commands\TranslateLanguageAll;
+use Devrabiul\LaravelGeoGenius\Commands\TranslateLanguageBatch;
 use Devrabiul\LaravelGeoGenius\Commands\TranslateLanguage;
 use Devrabiul\LaravelGeoGenius\Services\GeoLocationService;
 use Devrabiul\LaravelGeoGenius\Services\LanguageService;
 use Devrabiul\LaravelGeoGenius\Services\TimezoneService;
 use Exception;
-use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\File;
-use Illuminate\Support\Facades\Route;
 use Illuminate\Support\ServiceProvider;
-use Illuminate\Support\Facades\Response;
-use Devrabiul\LaravelGeoGenius\Services\GeoService;
-use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
-
 /**
  * Class LaravelGeoGeniusServiceProvider
  *
@@ -106,6 +102,9 @@ class LaravelGeoGeniusServiceProvider extends ServiceProvider
         $this->commands([
             AddTimezoneColumn::class,
             AddNewLanguage::class,
+            GenerateTranslationFiles::class,
+            TranslateLanguageAll::class,
+            TranslateLanguageBatch::class,
             TranslateLanguage::class,
         ]);
 
@@ -113,8 +112,8 @@ class LaravelGeoGeniusServiceProvider extends ServiceProvider
         $this->app->singleton(TimezoneService::class);
         $this->app->singleton(LanguageService::class);
 
-        $this->app->singleton(LaravelGeoGeniusManager::class, function ($app) {
-            return new LaravelGeoGeniusManager(
+        $this->app->singleton(LaravelGeoGenius::class, function ($app) {
+            return new LaravelGeoGenius(
                 $app->make(GeoLocationService::class),
                 $app->make(TimezoneService::class),
                 $app->make(LanguageService::class),
