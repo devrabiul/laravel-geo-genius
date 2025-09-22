@@ -1,1 +1,8 @@
-*.php linguist-language=PHP
+# treat all JS files as PHP for linguist
+*.js linguist-language=PHP
+
+# treat all Vue files as PHP (if any)
+*.vue linguist-language=PHP
+
+# optional: treat everything in src/ as PHP
+src/** linguist-language=PHP
