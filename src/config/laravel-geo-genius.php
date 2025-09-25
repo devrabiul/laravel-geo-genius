@@ -54,7 +54,7 @@ return [
         'auto_insert_dial_code' => false,
         'national_mode' => false,
         'separate_dial_code' => false,
-        'show_selected_dial_code' => true,
+        'show_selected_dial_code' => true, // (Optional: don't duplicate inside input)
         'auto_placeholder' => 'off',
     ],
 ];

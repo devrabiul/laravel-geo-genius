@@ -253,6 +253,22 @@ function initializeIntlTelInput() {
         return value === "1" || value === "true";
     }
 
+    const separateDialCode = configDataset.separateDialCode !== undefined
+        ? toBool(configDataset.separateDialCode)
+        : true; // default true
+
+    const showSelectedDialCode = configDataset.showSelectedDialCode !== undefined
+        ? toBool(configDataset.showSelectedDialCode)
+        : false; // default false
+
+    const autoInsertDialCode = configDataset.autoInsertDialCode !== undefined
+        ? toBool(configDataset.autoInsertDialCode)
+        : false; // default false
+
+    const nationalMode = configDataset.nationalMode !== undefined
+        ? toBool(configDataset.nationalMode)
+        : false; // default false
+
     // choose detected_country first, fallback to initial_country, then "us"
     const defaultCountry =
         (configDataset.detectedCountry || configDataset.initialCountry || "us").toLowerCase();
@@ -260,11 +276,11 @@ function initializeIntlTelInput() {
     inputs.forEach(input => {
         const iti = window.intlTelInput(input, {
             initialCountry: defaultCountry,
-            autoInsertDialCode: toBool(configDataset.autoInsertDialCode),
-            nationalMode: toBool(configDataset.nationalMode),
+            autoInsertDialCode: autoInsertDialCode,
+            nationalMode: nationalMode,
             formatOnDisplay: false,
-            separateDialCode: toBool(configDataset.separateDialCode),
-            showSelectedDialCode: toBool(configDataset.showSelectedDialCode),
+            separateDialCode: separateDialCode,
+            showSelectedDialCode: showSelectedDialCode,
             autoPlaceholder: configDataset.autoPlaceholder || "off",
             utilsScript:
                 "https://cdn.jsdelivr.net/npm/intl-tel-input@19.2.15/build/js/utils.js"
