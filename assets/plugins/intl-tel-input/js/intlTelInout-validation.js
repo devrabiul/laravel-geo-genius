@@ -335,7 +335,7 @@ function initializeIntlTelInput() {
 
         const hiddenCountryCodeInput = document.createElement('input');
         hiddenCountryCodeInput.type = 'hidden';
-        hiddenCountryCodeInput.name = 'country_code';
+        hiddenCountryCodeInput.name = originalName + '_country_code';
         input.parentNode.appendChild(hiddenCountryCodeInput);
 
         // ✅ Set initial value if exists
