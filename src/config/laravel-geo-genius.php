@@ -51,6 +51,8 @@ return [
     */
     'phone_input' => [
         'initial_country' => env('GEO_PHONE_DEFAULT_COUNTRY', 'us'),
+        'only_countries_mode' => false,
+        'only_countries_array' => ['us'],
         'auto_insert_dial_code' => false,
         'national_mode' => false,
         'separate_dial_code' => false,

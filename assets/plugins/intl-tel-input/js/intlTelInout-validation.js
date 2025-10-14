@@ -253,6 +253,20 @@ function initializeIntlTelInput() {
         return value === "1" || value === "true";
     }
 
+    // Parse `onlyCountriesArray` safely from string (e.g. "['us','gb']")
+    function parseCountries(value) {
+        if (!value || value === "[]" || value === "") return [];
+        try {
+            // Try to parse JSON-style or comma-separated strings
+            if (value.startsWith("[")) {
+                return JSON.parse(value.replace(/'/g, '"'));
+            }
+            return value.split(",").map(c => c.trim().toLowerCase());
+        } catch {
+            return [];
+        }
+    }
+
     const separateDialCode = configDataset.separateDialCode !== undefined
         ? toBool(configDataset.separateDialCode)
         : true; // default true
@@ -269,6 +283,9 @@ function initializeIntlTelInput() {
         ? toBool(configDataset.nationalMode)
         : false; // default false
 
+    const onlyCountries = parseCountries(configDataset.onlyCountriesArray);
+    const onlyCountriesMode = toBool(configDataset.onlyCountriesMode);
+
     // choose detected_country first, fallback to initial_country, then "us"
     const defaultCountry =
         (configDataset.detectedCountry || configDataset.initialCountry || "us").toLowerCase();
@@ -282,6 +299,10 @@ function initializeIntlTelInput() {
             separateDialCode: separateDialCode,
             showSelectedDialCode: showSelectedDialCode,
             autoPlaceholder: configDataset.autoPlaceholder || "off",
+            // Add onlyCountries only if mode is enabled and array is not empty
+            ...(onlyCountriesMode && onlyCountries.length > 0
+            ? { onlyCountries: onlyCountries }
+            : {}),
             utilsScript:
                 "https://cdn.jsdelivr.net/npm/intl-tel-input@19.2.15/build/js/utils.js"
         });

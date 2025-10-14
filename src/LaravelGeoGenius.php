@@ -76,6 +76,8 @@ class LaravelGeoGenius
         $config = config('laravel-geo-genius', []);
         $phoneInputConfig = $config['phone_input'] ?? [
             'initial_country' => env('GEO_PHONE_DEFAULT_COUNTRY', 'us'),
+            'only_countries_mode' => false,
+            'only_countries_array' => ['us'],
             'auto_insert_dial_code' => false,
             'national_mode' => false,
             'separate_dial_code' => false,
@@ -83,9 +85,30 @@ class LaravelGeoGenius
             'auto_placeholder' => 'off',
         ];
 
-        $phoneInputConfig['detected_country'] = strtolower(laravelGeoGenius()->geo()->getCountryCode());
-        $attr = '';
+        $updatedPhoneInputConfig = [];
         foreach ($phoneInputConfig as $key => $value) {
+            if (
+                isset($phoneInputConfig['only_countries_mode']) &&
+                (bool)($phoneInputConfig['only_countries_mode']) === false &&
+                $key == 'only_countries_array'
+            ) {
+                $updatedPhoneInputConfig['only_countries_array'] = (string)"[]";
+            }
+            if (
+                isset($phoneInputConfig['only_countries_mode']) &&
+                (bool)($phoneInputConfig['only_countries_mode']) === true &&
+                $key == 'only_countries_array'
+            ) {
+                $updatedPhoneInputConfig['only_countries_array'] = json_encode($value);
+            }
+            if (!in_array($key, ['only_countries_array'])) {
+                $updatedPhoneInputConfig[$key] = $value;
+            }
+        }
+
+        $updatedPhoneInputConfig['detected_country'] = strtolower(laravelGeoGenius()->geo()->getCountryCode());
+        $attr = '';
+        foreach ($updatedPhoneInputConfig as $key => $value) {
             $attr .= ' data-' . str_replace('_', '-', $key) . '="' . htmlspecialchars($value, ENT_QUOTES) . '"';
         }
         $scripts[] = '<span class="system-default-country-code" ' . $attr . '></span>';

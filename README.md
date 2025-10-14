@@ -266,6 +266,38 @@ form.addEventListener('submit', e => {
 
 ---
 
+## 🌍 Restrict to Specific Countries
+
+Laravel GeoGenius gives you full control over which countries appear in the **phone input dropdown**.
+You can either show **all countries** (default) or restrict it to **a specific set** such as only the U.S. and Canada.
+
+This behavior is configured in your `config/laravel-geo-genius.php` file under the `phone_input` section.
+
+### Example Configuration
+
+```php
+'phone_input' => [
+    'initial_country' => env('GEO_PHONE_DEFAULT_COUNTRY', 'us'),
+    'only_countries_mode' => true, // enable restriction mode
+    'only_countries_array' => ['us', 'ca'], // allowed countries only
+    'auto_insert_dial_code' => false,
+    'national_mode' => false,
+    'separate_dial_code' => false,
+    'show_selected_dial_code' => true,
+    'auto_placeholder' => 'off',
+],
+```
+
+When `only_countries_mode` is `true`, GeoGenius will:
+
+✅ Restrict the dropdown list to countries in `only_countries_array`
+✅ Set the `initial_country` to the visitor’s detected country (if allowed)
+✅ Fallback to the default country if the detected one isn’t in the list
+
+If the mode is disabled (`false`), all countries are shown automatically.
+
+---
+
 ## 🧠 Additional Notes
 
 * 🌐 **APIs Used:** [ipify.org](https://api.ipify.org), [ipwho.is](https://ipwho.is)
