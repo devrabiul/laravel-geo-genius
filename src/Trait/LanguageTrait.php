@@ -69,48 +69,82 @@ trait LanguageTrait
 
     public static function getLanguageAddProcess(string $lang): void
     {
-        if (!is_dir(resource_path('lang'))) {
-            mkdir(resource_path('lang'), 0777, true);
+        $langPath = resource_path('lang');
+
+        // Ensure base lang directory exists
+        if (!is_dir($langPath)) {
+            mkdir($langPath, 0777, true);
         } else {
-            $output = [];
-            exec('chmod -R 0777 ' . resource_path('lang'), $output);
+            self::recursiveChmod($langPath, 0777);
         }
 
-        if (!file_exists(base_path('resources/lang/' . $lang))) {
-            mkdir(base_path('resources/lang/' . $lang), 0777, true);
-            $files = File::allFiles(base_path('resources/lang/' . $lang));
-            foreach ($files as $file) {
-                chmod($file, 0777);
+        $targetLangPath = base_path("resources/lang/{$lang}");
+        $defaultLangPath = base_path('resources/lang/en');
+
+        // Create new language directory if not exists
+        if (!is_dir($targetLangPath)) {
+            mkdir($targetLangPath, 0777, true);
+
+            // Create default English files if missing
+            if (!file_exists("{$defaultLangPath}/messages.php")) {
+                file_put_contents("{$defaultLangPath}/messages.php", "<?php\n\nreturn [];\n");
+            }
+            if (!file_exists("{$defaultLangPath}/new-messages.php")) {
+                file_put_contents("{$defaultLangPath}/new-messages.php", "<?php\n\nreturn [];\n");
             }
 
-            if (!file_exists(base_path('resources/lang/en/messages.php'))) {
-                file_put_contents(base_path('resources/lang/en/messages.php'), "<?php\n\nreturn [];\n");
-                file_put_contents(base_path('resources/lang/en/new-messages.php'), "<?php\n\nreturn [];\n");
-            }
+            // Copy content from English
+            $messagesFromDefaultLanguage = file_get_contents("{$defaultLangPath}/new-messages.php");
 
-            $messagesFromDefaultLanguage = file_get_contents(base_path('resources/lang/en/new-messages.php'));
-            if ($lang != 'en') {
-                $messagesNewFile = fopen(base_path('resources/lang/' . $lang . '/' . 'new-messages.php'), "w") or die("Unable to open file!");
-                $messagesFile = fopen(base_path('resources/lang/' . $lang . '/' . 'messages.php'), "w") or die("Unable to open file!");
-                fwrite($messagesNewFile, $messagesFromDefaultLanguage);
-                $messagesFileContents = "<?php\n\nreturn [];\n";
-                file_put_contents(base_path('resources/lang/' . $lang . '/messages.php'), $messagesFileContents);
-                $translatedMessagesArray = include(base_path('resources/lang/en/messages.php'));
-                $newMessagesArray = include(base_path('resources/lang/en/new-messages.php'));
+            if ($lang !== 'en') {
+                // Create target files
+                file_put_contents("{$targetLangPath}/new-messages.php", $messagesFromDefaultLanguage);
+                file_put_contents("{$targetLangPath}/messages.php", "<?php\n\nreturn [];\n");
+
+                // Merge arrays from English
+                $translatedMessagesArray = include("{$defaultLangPath}/messages.php");
+                $newMessagesArray = include("{$defaultLangPath}/new-messages.php");
+
                 $allMessages = array_merge($translatedMessagesArray, $newMessagesArray);
-                $dataFiltered = [];
-                foreach ($allMessages as $key => $data) {
-                    $dataFiltered[$key] = $data;
-                }
-                $string = "<?php return " . var_export($dataFiltered, true) . ";";
-                file_put_contents(base_path('resources/lang/' . $lang . '/new-messages.php'), $string);
+                $string = "<?php return " . var_export($allMessages, true) . ";";
+                file_put_contents("{$targetLangPath}/new-messages.php", $string);
             }
-            self::geniusSortTranslateArrayByKey(targetPath: base_path('resources/lang/' . $lang . '/messages.php'));
+
+            self::geniusSortTranslateArrayByKey(
+                targetPath: "{$targetLangPath}/messages.php"
+            );
         }
 
-        $languagePath = [];
-        exec('chmod -R 0777 ' . resource_path('lang'), $languagePath);
+        // Apply recursive chmod safely
+        self::recursiveChmod($langPath, 0777);
     }
+
+    /**
+     * Recursively apply chmod on directory and files
+     */
+    protected static function recursiveChmod(string $path, int $mode): void
+    {
+        if (!file_exists($path)) {
+            return;
+        }
+
+        if (is_file($path)) {
+            chmod($path, $mode);
+            return;
+        }
+
+        $iterator = new \RecursiveIteratorIterator(
+            new \RecursiveDirectoryIterator($path, \FilesystemIterator::SKIP_DOTS),
+            \RecursiveIteratorIterator::SELF_FIRST
+        );
+
+        foreach ($iterator as $item) {
+            @chmod($item->getPathname(), $mode);
+        }
+
+        @chmod($path, $mode);
+    }
+
 
     public static function getLanguageCodeFromCountryCode(string $countryCode): ?string
     {
