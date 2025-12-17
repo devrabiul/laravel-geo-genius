@@ -30,11 +30,45 @@ class LanguageService
 
     public function changeUserLanguage($locale): void
     {
-        $languageCode = LanguageTrait::checkLocaleValidity(locale: $locale);
+        $languageCode = laravelGeoGenius()->language()->checkLocaleValidity(locale: $locale);
         $direction = self::isRtl($languageCode) ? 'rtl' : 'ltr';
         session()->put('genius_local_Language', $languageCode);
         session()->put('direction', $direction);
         app()->setLocale($languageCode);
+    }
+
+    public function checkLocaleValidity($locale): string
+    {
+        $langDirectories = laravelGeoGenius()->language()->getLanguageFilesDirectories(path: base_path('resources/lang/'));
+        if ($locale != 'en' && !in_array($locale, $langDirectories)) {
+            return 'en';
+        }
+        return array_key_exists($locale, self::getAllLanguageNames()) ? $locale : 'en';
+    }
+
+    public function getLanguageFilesDirectories(string $path): array
+    {
+        if (!is_dir(resource_path('lang'))) {
+            mkdir(resource_path('lang'), 0777, true);
+        } else {
+            $output = [];
+            exec('chmod -R 0777 ' . resource_path('lang'), $output);
+        }
+
+        $directories = [];
+        $items = scandir($path);
+        foreach ($items as $item) {
+            if ($item == '..' || $item == '.')
+                continue;
+            if (is_dir($path . '/' . $item))
+                $directories[] = $item;
+        }
+        return $directories;
+    }
+
+    public static function geniusRemoveInvalidCharacters($str): array|string
+    {
+        return str_ireplace(['"', ';', '<', '>'], ' ', preg_replace('/\s\s+/', ' ', $str));
     }
 
     public function getUserLangDirection(): string
@@ -99,13 +133,13 @@ class LanguageService
         }, ARRAY_FILTER_USE_KEY);
 
         if (isset($newMessagesArray[$textKey])) {
-            $text = ucfirst(str_replace('_', ' ', LanguageTrait::geniusRemoveInvalidCharacters(str_replace("'", "", $textKey))));
+            $text = ucfirst(str_replace('_', ' ', laravelGeoGenius()->language()->geniusRemoveInvalidCharacters(str_replace("'", "", $textKey))));
 
             if ($manualMessage) {
                 $translatedText = $manualMessage;
             } else {
                 $translated = $this->autoTranslator($text, 'en', $languageCode);
-                $translatedText = $translated ? LanguageTrait::geniusRemoveInvalidCharacters(preg_replace('/\s+/', ' ', $translated)) : null;
+                $translatedText = $translated ? laravelGeoGenius()->language()->geniusRemoveInvalidCharacters(preg_replace('/\s+/', ' ', $translated)) : null;
             }
 
             if ($translatedText !== null) {
@@ -155,7 +189,7 @@ class LanguageService
 
             return $translated;
         } catch (Throwable $th) {
-            return LanguageTrait::geniusRemoveInvalidCharacters($text);
+            return laravelGeoGenius()->language()->geniusRemoveInvalidCharacters($text);
         }
     }
 

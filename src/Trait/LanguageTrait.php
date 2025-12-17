@@ -8,39 +8,6 @@ use Devrabiul\LaravelGeoGenius\Services\LanguageService;
 
 trait LanguageTrait
 {
-    public static function getLanguageFilesDirectories(string $path): array
-    {
-        if (!is_dir(resource_path('lang'))) {
-            mkdir(resource_path('lang'), 0777, true);
-        } else {
-            $output = [];
-            exec('chmod -R 0777 ' . resource_path('lang'), $output);
-        }
-
-        $directories = [];
-        $items = scandir($path);
-        foreach ($items as $item) {
-            if ($item == '..' || $item == '.')
-                continue;
-            if (is_dir($path . '/' . $item))
-                $directories[] = $item;
-        }
-        return $directories;
-    }
-
-    public static function geniusRemoveInvalidCharacters($str): array|string
-    {
-        return str_ireplace(['"', ';', '<', '>'], ' ', preg_replace('/\s\s+/', ' ', $str));
-    }
-
-    public static function checkLocaleValidity($locale): string
-    {
-        $langDirectories = LanguageTrait::getLanguageFilesDirectories(path: base_path('resources/lang/'));
-        if ($locale != 'en' && !in_array($locale, $langDirectories)) {
-            return 'en';
-        }
-        return array_key_exists($locale, self::getAllLanguageNames()) ? $locale : 'en';
-    }
 
     public static function geniusSortTranslateArrayByKey($targetPath): void
     {
@@ -174,7 +141,7 @@ trait LanguageTrait
                     $languageSerive = new LanguageService();
                     $translated = $languageSerive->autoTranslator($key, 'en', $languageCode);
                     if ($translated !== null) {
-                        $translatedMessagesArray[$key] = preg_replace('/\s+/', ' ', LanguageTrait::geniusRemoveInvalidCharacters($translated));
+                        $translatedMessagesArray[$key] = preg_replace('/\s+/', ' ', laravelGeoGenius()->language()->geniusRemoveInvalidCharacters($translated));
                         $translatedKey = $key;
 
                         $messagesFileContents = "<?php\n\nreturn [\n";

@@ -23,12 +23,12 @@ if (!function_exists('geniusTranslate')) {
 
         if (!empty($key) || $key == 0) {
             if (App::getLocale() != 'en') {
-                $languageDirectories = LanguageTrait::getLanguageFilesDirectories(path: base_path('resources/lang/'));
+                $languageDirectories = laravelGeoGenius()->language()->getLanguageFilesDirectories(path: base_path('resources/lang/'));
                 foreach ($languageDirectories as $directory) {
                     geniusTranslateMessageValueByKey(local: $directory, key: $key);
                 }
             }
-            $local = LanguageTrait::checkLocaleValidity(locale: laravelGeoGenius()->language()->getUserLanguage());
+            $local = laravelGeoGenius()->language()->checkLocaleValidity(locale: laravelGeoGenius()->language()->getUserLanguage());
             App::setLocale($local);
             return geniusTranslateMessageValueByKey(local: $local, key: $key);
         }
@@ -70,8 +70,8 @@ if (!function_exists('geniusTranslateMessageValueByKey')) {
 
         try {
             $escapedKey = str_replace("'", "/'", $key);
-            $cleanKey = LanguageTrait::geniusRemoveInvalidCharacters($escapedKey);
-            $processedKey = str_replace('_', ' ', LanguageTrait::geniusRemoveInvalidCharacters(str_replace("\'", "'", $key)));
+            $cleanKey = laravelGeoGenius()->language()->geniusRemoveInvalidCharacters($escapedKey);
+            $processedKey = str_replace('_', ' ', laravelGeoGenius()->language()->geniusRemoveInvalidCharacters(str_replace("\'", "'", $key)));
 
             $translatedMessagesArray = include(base_path('resources/lang/' . $local . '/messages.php'));
             $newMessagesArray = include(base_path('resources/lang/' . $local . '/new-messages.php'));
@@ -99,7 +99,7 @@ if (!function_exists('geniusTranslateMessageValueByKey')) {
                 $message = __('messages.' . $cleanKey);;
             }
         } catch (\Exception $exception) {
-            $message = str_replace('_', ' ', LanguageTrait::geniusRemoveInvalidCharacters(str_replace("\'", "'", $key)));
+            $message = str_replace('_', ' ', laravelGeoGenius()->language()->geniusRemoveInvalidCharacters(str_replace("\'", "'", $key)));
         }
         return $message;
     }

@@ -63,8 +63,8 @@ class GenerateTranslationFiles extends Command
         // Map old messages: keep underscores in keys, clean values
         $messagesArray = collect($messagesArray)->mapWithKeys(function ($item, $key) {
             $escapedKey = str_replace("'", "/'", $key);
-            $cleanKey = LanguageTrait::geniusRemoveInvalidCharacters($escapedKey); // underscores preserved
-            $matchValue = str_replace('_', ' ', LanguageTrait::geniusRemoveInvalidCharacters(str_replace("\'", "'", $item))); // underscores replaced in value
+            $cleanKey = laravelGeoGenius()->language()->geniusRemoveInvalidCharacters($escapedKey); // underscores preserved
+            $matchValue = str_replace('_', ' ', laravelGeoGenius()->language()->geniusRemoveInvalidCharacters(str_replace("\'", "'", $item))); // underscores replaced in value
             return [$cleanKey => $matchValue];
         })->toArray();
 
@@ -108,8 +108,8 @@ class GenerateTranslationFiles extends Command
 
                 if (!isset($messagesArray[$match])) {
                     $escapedKey = str_replace("'", "/'", $match);
-                    $cleanKey = LanguageTrait::geniusRemoveInvalidCharacters($escapedKey); // keep underscores in key
-                    $matchValue = str_replace('_', ' ', LanguageTrait::geniusRemoveInvalidCharacters(str_replace("\'", "'", $match))); // spaces in value
+                    $cleanKey = laravelGeoGenius()->language()->geniusRemoveInvalidCharacters($escapedKey); // keep underscores in key
+                    $matchValue = str_replace('_', ' ', laravelGeoGenius()->language()->geniusRemoveInvalidCharacters(str_replace("\'", "'", $match))); // spaces in value
                     $messagesArray[$cleanKey] = $matchValue;
                     $foundKeywords++;
                 }

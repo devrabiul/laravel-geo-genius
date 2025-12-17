@@ -97,7 +97,7 @@ class TranslateLanguageBatch extends Command
         $batchInput = [];
         foreach ($batchKeys as $key) {
             $batchInput[$key] = str_replace('_', ' ',
-                LanguageTrait::geniusRemoveInvalidCharacters(
+                laravelGeoGenius()->language()->geniusRemoveInvalidCharacters(
                     str_replace("\'", "'", $newMessages[$key])
                 )
             );
