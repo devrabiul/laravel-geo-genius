@@ -15,15 +15,15 @@ class LanguageService
 
     public function getUserLanguage(): mixed
     {
-        if (session()->has('genius_local_Language')) {
-            $languageCode = session('genius_local_Language');
+        if (Session::has('genius_local_Language')) {
+            $languageCode = Session::get('genius_local_Language');
         } else {
             $userCountryCode = strtolower(laravelGeoGenius()->geo()->getCountryCode());
             $languageCode = LanguageTrait::getLanguageCodeFromCountryCode($userCountryCode);
 
             $direction = self::isRtl($languageCode) ? 'rtl' : 'ltr';
-            session()->put('genius_local_Language', $languageCode);
-            session()->put('direction', $direction);
+            Session::put('genius_local_Language', $languageCode);
+            Session::put('direction', $direction);
         }
         return $languageCode;
     }
@@ -32,8 +32,8 @@ class LanguageService
     {
         $languageCode = laravelGeoGenius()->language()->checkLocaleValidity(locale: $locale);
         $direction = self::isRtl($languageCode) ? 'rtl' : 'ltr';
-        session()->put('genius_local_Language', $languageCode);
-        session()->put('direction', $direction);
+        Session::put('genius_local_Language', $languageCode);
+        Session::put('direction', $direction);
         app()->setLocale($languageCode);
     }
 
@@ -73,7 +73,7 @@ class LanguageService
 
     public function getUserLangDirection(): string
     {
-        return session('direction') ?? 'ltr';
+        return Session::get('direction') ?? 'ltr';
     }
 
     /**

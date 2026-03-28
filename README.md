@@ -163,6 +163,24 @@ Route::get('/change-lang', function () {
 
 > Supported locale codes depend on your configuration (`config/laravel-geo-genius.php`) and the languages you have added via `geo:add-language`.
 
+### 🧾 Session Key: `genius_local_Language`
+
+GeoGenius stores the active locale in session using:
+
+`genius_local_Language`
+
+You can read it anywhere in your app:
+
+```php
+$currentLocale = session('genius_local_Language', app()->getLocale());
+```
+
+You can also apply it manually if needed:
+
+```php
+app()->setLocale(session('genius_local_Language', config('app.locale')));
+```
+
 
 ## 🛠 Timezone Artisan Commands
 
